@@ -39,6 +39,53 @@ describe("/api/topics", () => {
   });
 });
 
+describe("/api/articles", () => {
+  test("GET 200: Respond with an articles array of article of objects containing 8 values", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        body.forEach((article) => {
+          expect(Object.keys(article).length).toBe(8);
+        });
+      });
+  });
+
+  test("GET 200: Respond with an articles array of article objects with following properties: author, title, article_id, topic, created_at,votes, article_img_url, comment_count in correct format", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        body.forEach((article, index) => {
+          expect(typeof article.article_id).toBe("number");
+          expect(typeof article.author).toBe("string");
+          expect(typeof article.title).toBe("string");
+          expect(typeof article.topic).toBe("string");
+          expect(typeof article.created_at).toBe("string");
+          expect(typeof article.votes).toBe("number");
+          expect(typeof article.article_img_url).toBe("string");
+          expect(typeof article.comment_count).toBe("number");
+        });
+      });
+  });
+
+  test("GET 200: Respond with an articles array of article objects sorted by date in descending order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const ifDescendingOrder = body.every((article, index) => {
+          if (index < body.length - 1) {
+            return article.created_at >= body[index + 1].created_at;
+          }
+          return true;
+        });
+
+        expect(ifDescendingOrder).toBe(true);
+      });
+  });
+});
+
 describe("/api/articles/:article_id", () => {
   test("GET 200: Respond with the correct article for the given article_id.", () => {
     return request(app)

@@ -7,7 +7,10 @@ const {
 } = require("./errors/index.js");
 
 const { getAlltopics } = require("./controllers/topics-controllers");
-const { getArticleById } = require("./controllers/articles-controllers");
+const {
+  getArticleById,
+  getArticles,
+} = require("./controllers/articles-controllers");
 const endpoints = require("./endpoints.json");
 
 app.get("/api", (request, response, next) => {
@@ -15,6 +18,7 @@ app.get("/api", (request, response, next) => {
 });
 
 app.get("/api/topics", getAlltopics);
+app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id", getArticleById);
 
 app.use(handleCustomErrors);
