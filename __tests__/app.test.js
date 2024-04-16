@@ -45,6 +45,7 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
+        expect(body.length).toBe(13);
         body.forEach((article) => {
           expect(Object.keys(article).length).toBe(8);
         });
@@ -56,6 +57,7 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
+        expect(body.length).toBe(13);
         body.forEach((article, index) => {
           expect(typeof article.article_id).toBe("number");
           expect(typeof article.author).toBe("string");
@@ -74,14 +76,10 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
-        const ifDescendingOrder = body.every((article, index) => {
-          if (index < body.length - 1) {
-            return article.created_at >= body[index + 1].created_at;
-          }
-          return true;
+        expect(body.length).toBe(13);
+        expect(body).toBeSortedBy("created_at", {
+          descending: true,
         });
-
-        expect(ifDescendingOrder).toBe(true);
       });
   });
 });
@@ -106,7 +104,7 @@ describe("/api/articles/:article_id", () => {
       });
   });
 
-  test("GET 400: Respond with an error when passed an article_id with an incorrect forma", () => {
+  test("GET 400: Respond with an error when passed an article_id with an incorrect format", () => {
     return request(app)
       .get("/api/articles/invalid_id_format")
       .expect(400)
@@ -119,6 +117,68 @@ describe("/api/articles/:article_id", () => {
   test("GET 404: Respond with an error when passed an article_id that is not presented in the database.", () => {
     return request(app)
       .get("/api/articles/9999")
+      .expect(404)
+      .then(({ body }) => {
+        const { message } = body;
+        expect(message).toBe("id not found");
+      });
+  });
+});
+
+describe("/api/articles/:article_id/comments", () => {
+  test("GET 200:  Respond with an  array of comments each containing 6 values in correct format.", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments.length).toBe(11);
+        comments.forEach((comment) => {
+          expect(typeof comment.comment_id).toBe("number");
+          expect(typeof comment.votes).toBe("number");
+          expect(typeof comment.created_at).toBe("string");
+          expect(typeof comment.author).toBe("string");
+          expect(typeof comment.body).toBe("string");
+          expect(typeof comment.article_id).toBe("number");
+        });
+      });
+  });
+
+  test("GET 200:  Respond with an  array of comments in DESC order.", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
+
+  test("GET 200:  Respond with an empty array of comments if no comments added to the article.", () => {
+    return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments.length).toBe(0);
+      });
+  });
+
+  test("GET 400: Respond with an error when passed an article_id with an incorrect format", () => {
+    return request(app)
+      .get("/api/articles/invalid_id_format/comments")
+      .expect(400)
+      .then(({ body }) => {
+        const { message } = body;
+        expect(message).toBe("invalid id type");
+      });
+  });
+
+  test("GET 404: Respond with an error when passed an article_id that is not presented in the database.", () => {
+    return request(app)
+      .get("/api/articles/9999/comments")
       .expect(404)
       .then(({ body }) => {
         const { message } = body;
