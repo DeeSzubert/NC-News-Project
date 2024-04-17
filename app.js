@@ -18,7 +18,6 @@ const {
   getArticleById,
   getArticles,
   getPatchedArticle,
-  getArticlesByTopic,
 } = require("./controllers/articles-controllers.js");
 const endpoints = require("./endpoints.json");
 
@@ -31,7 +30,6 @@ app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.get("/api/users", getAllUsers);
-// app.get("/api/articles?topic=cats", getArticlesByTopic);
 
 app.post("/api/articles/:article_id/comments", postNewComment);
 
