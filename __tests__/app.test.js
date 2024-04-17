@@ -333,6 +333,23 @@ describe("/api/comments/:comment_id", () => {
   });
 });
 
+describe("/api/users", () => {
+  test("GET 200: Responds with an array of user objects, each of which should have 3 properties: username, name and avatar_url. ", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.length).toBe(4);
+        body.forEach((user) => {
+          expect(Object.keys(user).length).toBe(3);
+          expect(typeof user.username).toBe("string");
+          expect(typeof user.name).toBe("string");
+          expect(typeof user.avatar_url).toBe("string");
+        });
+      });
+  });
+});
+
 describe("Undeclared endpoints", () => {
   test("ALL 404: Responds with an error when the endpoint has not been found", () => {
     return request(app)
