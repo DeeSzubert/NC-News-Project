@@ -11,4 +11,10 @@ function checkIfUserExists(username) {
     });
 }
 
-module.exports = { checkIfUserExists };
+function fetchAllUsers() {
+  return db.query(`SELECT * FROM users`).then(({ rows }) => {
+    return rows;
+  });
+}
+
+module.exports = { checkIfUserExists, fetchAllUsers };
