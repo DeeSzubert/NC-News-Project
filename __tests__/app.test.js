@@ -40,18 +40,6 @@ describe("/api/topics", () => {
 });
 
 describe("/api/articles", () => {
-  test("GET 200: Respond with an articles array of article of objects containing 8 values", () => {
-    return request(app)
-      .get("/api/articles")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body.length).toBe(13);
-        body.forEach((article) => {
-          expect(Object.keys(article).length).toBe(8);
-        });
-      });
-  });
-
   test("GET 200: Respond with an articles array of article objects with following properties: author, title, article_id, topic, created_at,votes, article_img_url, comment_count in correct format", () => {
     return request(app)
       .get("/api/articles")
@@ -101,6 +89,26 @@ describe("/api/articles/:article_id", () => {
         expect(article.article_img_url).toBe(
           "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
         );
+      });
+  });
+
+  test("GET 200: Respond with the correct article with comment count.", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.comment_count).toBe(11);
+      });
+  });
+
+  test("GET 200: Respond with the correct article with comment count = 0 if no comments exist.", () => {
+    return request(app)
+      .get("/api/articles/2")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.comment_count).toBe(0);
       });
   });
 
