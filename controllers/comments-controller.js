@@ -1,6 +1,8 @@
 const {
   fetchCommentsByArticleId,
   addNewComment,
+  removeCommentById,
+  checkIfCommentExists,
 } = require("../models/comments-models");
 const { checkIfArticleExists } = require("../models/articles-models");
 const { checkIfUserExists } = require("../models/users-models");
@@ -36,4 +38,16 @@ function postNewComment(request, response, next) {
     .catch((error) => next(error));
 }
 
-module.exports = { getCommentsByArticleId, postNewComment };
+function deleteCommentById(request, response, next) {
+  const { comment_id } = request.params;
+  checkIfCommentExists(comment_id)
+    .then(() => {
+      return removeCommentById(comment_id);
+    })
+    .then(() => {
+      response.status(204).send();
+    })
+    .catch((error) => next(error));
+}
+
+module.exports = { getCommentsByArticleId, postNewComment, deleteCommentById };

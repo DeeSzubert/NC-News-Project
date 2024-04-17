@@ -302,6 +302,37 @@ describe("/api/articles/:article_id/comments", () => {
   });
 });
 
+describe("/api/comments/:comment_id", () => {
+  test("DELETE 204: Respond with status code 204 and 'No Content' message", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then(({ res }) => {
+        expect(res.statusMessage).toBe("No Content");
+      });
+  });
+
+  test("DELETE 400: Respond with an error when passes a comment_id with incorrect format", () => {
+    return request(app)
+      .delete("/api/comments/invalid_id_format")
+      .expect(400)
+      .then(({ body }) => {
+        const { message } = body;
+        expect(message).toBe("invalid id type");
+      });
+  });
+
+  test("DELETE 400: Respond with an error when passes a comment which is not presented in the database.", () => {
+    return request(app)
+      .delete("/api/comments/99")
+      .expect(404)
+      .then(({ body }) => {
+        const { message } = body;
+        expect(message).toBe("comment not found");
+      });
+  });
+});
+
 describe("Undeclared endpoints", () => {
   test("ALL 404: Responds with an error when the endpoint has not been found", () => {
     return request(app)
