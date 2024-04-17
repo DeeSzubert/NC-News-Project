@@ -1,6 +1,8 @@
 const {
   fetchArticleById,
   fetchAllArticles,
+  checkIfArticleExists,
+  patchArticle,
 } = require("../models/articles-models");
 
 function getArticleById(request, response, next) {
@@ -18,4 +20,18 @@ function getArticles(request, response, next) {
     response.status(200).send(articles);
   });
 }
-module.exports = { getArticleById, getArticles };
+
+function getPatchedArticle(request, response, next) {
+  const { article_id } = request.params;
+  const { inc_votes } = request.body;
+
+  checkIfArticleExists(article_id)
+    .then((result) => {
+      return patchArticle(article_id, inc_votes);
+    })
+    .then((patchedArticle) => {
+      response.status(200).send(patchedArticle);
+    })
+    .catch((error) => next(error));
+}
+module.exports = { getArticleById, getArticles, getPatchedArticle };

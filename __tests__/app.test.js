@@ -104,6 +104,32 @@ describe("/api/articles/:article_id", () => {
       });
   });
 
+  test("PATCH 200: Respond with updated article with votes more than 0", () => {
+    const newArticleVote = {
+      inc_votes: 20,
+    };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(newArticleVote)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.votes).toBe(120);
+      });
+  });
+
+  test("PATCH 200: Respond with updated article with votes = 0", () => {
+    const newArticleVote = {
+      inc_votes: 20,
+    };
+    return request(app)
+      .patch("/api/articles/3")
+      .send(newArticleVote)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.votes).toBe(20);
+      });
+  });
+
   test("GET 400: Respond with an error when passed an article_id with an incorrect format", () => {
     return request(app)
       .get("/api/articles/invalid_id_format")
@@ -117,6 +143,35 @@ describe("/api/articles/:article_id", () => {
   test("GET 404: Respond with an error when passed an article_id that is not presented in the database.", () => {
     return request(app)
       .get("/api/articles/9999")
+      .expect(404)
+      .then(({ body }) => {
+        const { message } = body;
+        expect(message).toBe("id not found");
+      });
+  });
+
+  test("PATCH 400: Respond with an error when passed an article_id with an incorrect format", () => {
+    const newArticleVote = {
+      inc_votes: 20,
+    };
+    return request(app)
+      .patch("/api/articles/invalid_id_format")
+      .send(newArticleVote)
+      .expect(400)
+      .then(({ body }) => {
+        const { message } = body;
+        expect(message).toBe("invalid id type");
+      });
+  });
+
+  test("PATCH 404: Respond with an error when passed an article_id that is not presented in the database.", () => {
+    const newArticleVote = {
+      inc_votes: 20,
+    };
+
+    return request(app)
+      .patch("/api/articles/9999")
+      .send()
       .expect(404)
       .then(({ body }) => {
         const { message } = body;
@@ -176,7 +231,6 @@ describe("/api/articles/:article_id/comments", () => {
       .send(postComment)
       .expect(201)
       .then(({ body }) => {
-        console.log(body);
         expect(body.comment[0].author).toBe("butter_bridge");
         expect(body.comment[0].body).toBe("test-body");
       });
