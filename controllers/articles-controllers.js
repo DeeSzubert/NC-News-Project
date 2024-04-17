@@ -3,6 +3,7 @@ const {
   fetchAllArticles,
   checkIfArticleExists,
   patchArticle,
+  fetchArticleByTopic,
 } = require("../models/articles-models");
 
 function getArticleById(request, response, next) {
@@ -16,9 +17,21 @@ function getArticleById(request, response, next) {
 }
 
 function getArticles(request, response, next) {
-  fetchAllArticles().then((articles) => {
-    response.status(200).send(articles);
-  });
+  const { topic } = request.query;
+
+  if (topic) {
+    return fetchArticleByTopic(topic)
+      .then((articles) => {
+        response.status(200).send(articles);
+      })
+      .catch((error) => next(error));
+  } else {
+    fetchAllArticles()
+      .then((articles) => {
+        response.status(200).send(articles);
+      })
+      .catch((error) => next(error));
+  }
 }
 
 function getPatchedArticle(request, response, next) {
@@ -34,4 +47,14 @@ function getPatchedArticle(request, response, next) {
     })
     .catch((error) => next(error));
 }
-module.exports = { getArticleById, getArticles, getPatchedArticle };
+
+function getArticlesByTopic(request, response, next) {
+  const { topic } = request.query;
+  console.log(topic);
+}
+module.exports = {
+  getArticleById,
+  getArticles,
+  getPatchedArticle,
+  getArticlesByTopic,
+};

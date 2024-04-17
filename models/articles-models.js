@@ -43,9 +43,21 @@ function patchArticle(article_id, inc_votes) {
     });
 }
 
+function fetchArticleByTopic(topic) {
+  return db
+    .query(`SELECT * FROM articles WHERE topic = $1`, [topic])
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({ status: 404, message: "topic not found" });
+      }
+      return rows;
+    });
+}
+
 module.exports = {
   fetchArticleById,
   fetchAllArticles,
   checkIfArticleExists,
   patchArticle,
+  fetchArticleByTopic,
 };
