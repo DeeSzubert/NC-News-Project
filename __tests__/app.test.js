@@ -166,6 +166,22 @@ describe("/api/articles/:article_id/comments", () => {
       });
   });
 
+  test("POST 201: Respond with new added object to given article_id", () => {
+    const postComment = {
+      username: "butter_bridge",
+      body: "test-body",
+    };
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send(postComment)
+      .expect(201)
+      .then(({ body }) => {
+        console.log(body);
+        expect(body.comment[0].author).toBe("butter_bridge");
+        expect(body.comment[0].body).toBe("test-body");
+      });
+  });
+
   test("GET 400: Respond with an error when passed an article_id with an incorrect format", () => {
     return request(app)
       .get("/api/articles/invalid_id_format/comments")
@@ -183,6 +199,51 @@ describe("/api/articles/:article_id/comments", () => {
       .then(({ body }) => {
         const { message } = body;
         expect(message).toBe("id not found");
+      });
+  });
+
+  test("POST 400: Respond with an error when passed an article_id with an incorrect format", () => {
+    const postComment = {
+      username: "butter_bridge",
+      body: "test-body",
+    };
+    return request(app)
+      .post("/api/articles/invalid_id_format/comments")
+      .send(postComment)
+      .expect(400)
+      .then(({ body }) => {
+        const { message } = body;
+        expect(message).toBe("invalid id type");
+      });
+  });
+
+  test("POST 404: Respond with an error when passed an article_id that is not presented in the database.", () => {
+    const postComment = {
+      username: "butter_bridge",
+      body: "test-body",
+    };
+    return request(app)
+      .post("/api/articles/9999/comments")
+      .send(postComment)
+      .expect(404)
+      .then(({ body }) => {
+        const { message } = body;
+        expect(message).toBe("id not found");
+      });
+  });
+
+  test("POST 404: Respond with an error when passed username is not presented in the database.", () => {
+    const postComment = {
+      username: "test-username",
+      body: "test-body",
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(postComment)
+      .expect(404)
+      .then(({ body }) => {
+        const { message } = body;
+        expect(message).toBe("username not found");
       });
   });
 });

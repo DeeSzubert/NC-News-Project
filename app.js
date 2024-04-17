@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+app.use(express.json());
 
 const {
   handleCustomErrors,
@@ -8,6 +9,7 @@ const {
 } = require("./errors/index.js");
 const {
   getCommentsByArticleId,
+  postNewComment,
 } = require("./controllers/comments-controller.js");
 const { getAlltopics } = require("./controllers/topics-controllers.js");
 const {
@@ -24,6 +26,7 @@ app.get("/api/topics", getAlltopics);
 app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
+app.post("/api/articles/:article_id/comments", postNewComment);
 
 app.use(handleCustomErrors);
 app.use(handlePsqlErrors);
