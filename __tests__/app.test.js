@@ -322,7 +322,7 @@ describe("/api/comments/:comment_id", () => {
       });
   });
 
-  test("DELETE 400: Respond with an error when passes a comment which is not presented in the database.", () => {
+  test("DELETE 404: Respond with an error when passes a comment which is not presented in the database.", () => {
     return request(app)
       .delete("/api/comments/99")
       .expect(404)
@@ -346,6 +346,27 @@ describe("/api/users", () => {
           expect(typeof user.name).toBe("string");
           expect(typeof user.avatar_url).toBe("string");
         });
+      });
+  });
+});
+
+describe("api/articles?query", () => {
+  test("GET 200: Respond with the correct articles for the given topic.", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.length).toBe(12);
+      });
+  });
+
+  test("GET 404: Respond with an error when passes a query which is not presented in the database.", () => {
+    return request(app)
+      .get("/api/articles?topic=incorrect_query")
+      .expect(404)
+      .then(({ body }) => {
+        const { message } = body;
+        expect(message).toBe("topic not found");
       });
   });
 });
