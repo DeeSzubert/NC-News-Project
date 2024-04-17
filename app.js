@@ -15,6 +15,7 @@ const { getAlltopics } = require("./controllers/topics-controllers.js");
 const {
   getArticleById,
   getArticles,
+  getPatchedArticle,
 } = require("./controllers/articles-controllers.js");
 const endpoints = require("./endpoints.json");
 
@@ -26,7 +27,10 @@ app.get("/api/topics", getAlltopics);
 app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
+
 app.post("/api/articles/:article_id/comments", postNewComment);
+
+app.patch("/api/articles/:article_id", getPatchedArticle);
 
 app.use(handleCustomErrors);
 app.use(handlePsqlErrors);
