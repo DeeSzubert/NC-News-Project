@@ -417,6 +417,67 @@ describe("/api/articles", () => {
   });
 });
 
+describe("/api/comments/:comment_id", () => {
+  test.only("PATCH 200: Respond with updated comment with positive vote", () => {
+    const newCommentVote = {
+      inc_votes: 1,
+    };
+
+    return request(app)
+      .patch("/api/comments/1")
+      .send(newCommentVote)
+      .expect(200)
+      .then(({ body }) => {
+        const { patchedComment } = body;
+        expect(patchedComment.votes).toBe(17);
+      });
+  });
+
+  test.only("PATCH 200: Respond with updated comment with negative vote", () => {
+    const newCommentVote = {
+      inc_votes: -1,
+    };
+
+    return request(app)
+      .patch("/api/comments/2")
+      .send(newCommentVote)
+      .expect(200)
+      .then(({ body }) => {
+        const { patchedComment } = body;
+        expect(patchedComment.votes).toBe(13);
+      });
+  });
+  test.only("PATCH 200: Respond with updated comment with negative vote in votes are 0", () => {
+    const newCommentVote = {
+      inc_votes: -1,
+    };
+
+    return request(app)
+      .patch("/api/comments/5")
+      .send(newCommentVote)
+      .expect(200)
+      .then(({ body }) => {
+        const { patchedComment } = body;
+        expect(patchedComment.votes).toBe(-1);
+      });
+  });
+
+  test.only("PATCH 404: Respond with an error when comment doesn't exists", () => {
+    const newCommentVote = {
+      inc_votes: -1,
+    };
+
+    return request(app)
+      .patch("/api/comments/999")
+      .send(newCommentVote)
+      .expect(404)
+      .then(({ body }) => {
+        const { message } = body;
+        expect(message).toBe("comment not found");
+      });
+  });
+});
+
 describe("/api/users/:username", () => {
   test("GET 200: Respond with an user object with following properties username, name and avatar_url", () => {
     return request(app)

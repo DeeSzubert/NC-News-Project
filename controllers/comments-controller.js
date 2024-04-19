@@ -6,6 +6,7 @@ const {
 } = require("../models/comments-models");
 const { checkIfArticleExists } = require("../models/articles-models");
 const { checkIfUserExists } = require("../models/users-models");
+const { patchedCommentById } = require("../models/comments-models");
 
 function getCommentsByArticleId(request, response, next) {
   const { article_id } = request.params;
@@ -50,4 +51,23 @@ function deleteCommentById(request, response, next) {
     .catch((error) => next(error));
 }
 
-module.exports = { getCommentsByArticleId, postNewComment, deleteCommentById };
+function getPatchedCommentById(request, response, next) {
+  const { comment_id } = request.params;
+  const { inc_votes } = request.body;
+
+  checkIfCommentExists(comment_id)
+    .then(() => {
+      return patchedCommentById(comment_id, inc_votes);
+    })
+    .then((patchedComment) => {
+      response.status(200).send({ patchedComment });
+    })
+    .catch((error) => next(error));
+}
+
+module.exports = {
+  getCommentsByArticleId,
+  postNewComment,
+  deleteCommentById,
+  getPatchedCommentById,
+};
