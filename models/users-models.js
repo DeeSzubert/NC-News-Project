@@ -7,7 +7,7 @@ function checkIfUserExists(username) {
       if (rows.length === 0) {
         return Promise.reject({ status: 404, message: "username not found" });
       }
-      return rows;
+      return rows[0];
     });
 }
 

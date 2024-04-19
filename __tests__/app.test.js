@@ -4,7 +4,6 @@ const data = require("../db/data/test-data");
 const app = require("../app");
 const request = require("supertest");
 const endpoints = require("../endpoints.json");
-const articles = require("../db/data/test-data/articles");
 
 afterAll(() => {
   db.end();
@@ -415,6 +414,33 @@ describe("/api/articles", () => {
           expect(message).toBe("topic not found");
         });
     });
+  });
+});
+
+describe("/api/users/:username", () => {
+  test("GET 200: Respond with an user object with following properties username, name and avatar_url", () => {
+    return request(app)
+      .get("/api/users/butter_bridge")
+      .expect(200)
+      .then(({ body }) => {
+        const { user } = body;
+
+        expect(user.username).toBe("butter_bridge");
+        expect(user.name).toBe("jonny");
+        expect(user.avatar_url).toBe(
+          "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+        );
+      });
+  });
+
+  test("GET 404: Respond with an error if passed invalid username", () => {
+    return request(app)
+      .get("/api/users/unknown-user")
+      .expect(404)
+      .then(({ body }) => {
+        const { message } = body;
+        expect(message).toBe("username not found");
+      });
   });
 });
 
