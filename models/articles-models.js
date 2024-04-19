@@ -14,14 +14,21 @@ function fetchArticleById(article_id) {
     });
 }
 
-function fetchAllArticles() {
-  return db
-    .query(
-      "SELECT articles.*, CAST(COUNT(comments.article_id) AS INT) AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id GROUP BY articles.article_id ORDER BY articles.created_at DESC;"
-    )
-    .then(({ rows }) => {
-      return rows;
-    });
+function fetchAllArticles(sort_by, order) {
+  const validSortBys = ["created_at", "author", "topic"];
+  const validOrder = ["asc", "desc"];
+  const queryValue = [];
+
+  if (!validSortBys.includes(sort_by) || !validOrder.includes(order)) {
+    return Promise.reject({ status: 400, message: "invalid query value" });
+  }
+  let sqlQueryString = `SELECT articles.*, CAST(COUNT(comments.article_id) AS INT) AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id `;
+
+  sqlQueryString += `GROUP BY articles.article_id ORDER BY ${sort_by} ${order} `;
+
+  return db.query(sqlQueryString, queryValue).then(({ rows }) => {
+    return rows;
+  });
 }
 
 function checkIfArticleExists(article_id) {
@@ -46,9 +53,9 @@ function patchArticle(article_id, inc_votes) {
     });
 }
 
-function fetchArticleByTopic(topic) {
+function fetchArticleByTopic(query, queryValue) {
   return db
-    .query(`SELECT * FROM articles WHERE topic = $1`, [topic])
+    .query(`SELECT * FROM articles WHERE ${query} = $1`, [queryValue])
     .then(({ rows }) => {
       if (rows.length === 0) {
         return Promise.reject({ status: 404, message: "topic not found" });
