@@ -17,18 +17,24 @@ function getArticleById(request, response, next) {
 }
 
 function getArticles(request, response, next) {
-  const { topic } = request.query;
+  const { sort_by = "created_at", order = "desc" } = request.query;
+  const validQuerys = ["topic", "author"];
 
-  if (topic) {
-    return fetchArticleByTopic(topic)
+  const query = Object.keys(request.query)[0];
+  const queryValue = Object.values(request.query)[0];
+
+  if (validQuerys.includes(query)) {
+    return fetchArticleByTopic(query, queryValue)
       .then((articles) => {
-        response.status(200).send(articles);
+        response.status(200).send({ articles });
       })
-      .catch((error) => next(error));
+      .catch((error) => {
+        next(error);
+      });
   } else {
-    fetchAllArticles()
+    fetchAllArticles(sort_by, order)
       .then((articles) => {
-        response.status(200).send(articles);
+        response.status(200).send({ articles });
       })
       .catch((error) => next(error));
   }
@@ -48,13 +54,8 @@ function getPatchedArticle(request, response, next) {
     .catch((error) => next(error));
 }
 
-function getArticlesByTopic(request, response, next) {
-  const { topic } = request.query;
-  console.log(topic);
-}
 module.exports = {
   getArticleById,
   getArticles,
   getPatchedArticle,
-  getArticlesByTopic,
 };
