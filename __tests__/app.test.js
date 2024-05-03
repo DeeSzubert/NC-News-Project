@@ -73,6 +73,31 @@ describe("/api/articles", () => {
       });
   });
 
+  test("POST 200: Respond with an added article", () => {
+    const newArticle = {
+      title: "New Article",
+      topic: "cats",
+      author: "butter_bridge",
+      body: "new body for article",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(201)
+      .then(({ body }) => {
+        const { newArticle } = body;
+        console.log(body);
+        expect(newArticle.title).toBe("New Article");
+        expect(newArticle.topic).toBe("cats");
+        expect(newArticle.author).toBe("butter_bridge");
+        expect(newArticle.body).toBe("new body for article");
+        expect(newArticle.votes).toBe(0);
+        expect(newArticle.article_img_url).toBe(
+          "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+        );
+      });
+  });
+
   describe("/api/articles/:article_id", () => {
     test("GET 200: Respond with the correct article for the given article_id.", () => {
       return request(app)
@@ -122,7 +147,18 @@ describe("/api/articles", () => {
         .send(newArticleVote)
         .expect(200)
         .then(({ body }) => {
-          expect(body.votes).toBe(120);
+          const { patchedArticle } = body;
+          expect(patchedArticle).toEqual({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: "2020-07-09T20:11:00.000Z",
+            votes: 120,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
         });
     });
 
@@ -135,7 +171,8 @@ describe("/api/articles", () => {
         .send(newArticleVote)
         .expect(200)
         .then(({ body }) => {
-          expect(body.votes).toBe(20);
+          const { patchedArticle } = body;
+          expect(patchedArticle.votes).toBe(20);
         });
     });
 
@@ -165,6 +202,20 @@ describe("/api/articles", () => {
       };
       return request(app)
         .patch("/api/articles/invalid_id_format")
+        .send(newArticleVote)
+        .expect(400)
+        .then(({ body }) => {
+          const { message } = body;
+          expect(message).toBe("invalid id type");
+        });
+    });
+
+    test("PATCH 400: Respond with an error when passed a body with an incorrect value format", () => {
+      const newArticleVote = {
+        inc_votes: "twenty",
+      };
+      return request(app)
+        .patch("/api/articles/1")
         .send(newArticleVote)
         .expect(400)
         .then(({ body }) => {
@@ -226,6 +277,7 @@ describe("/api/articles", () => {
         .expect(200)
         .then(({ body }) => {
           const { comments } = body;
+          expect(Array.isArray(comments)).toBe(true);
           expect(comments.length).toBe(0);
         });
     });
@@ -240,8 +292,9 @@ describe("/api/articles", () => {
         .send(postComment)
         .expect(201)
         .then(({ body }) => {
-          expect(body.comment[0].author).toBe("butter_bridge");
-          expect(body.comment[0].body).toBe("test-body");
+          const { comment } = body;
+          expect(comment.author).toBe("butter_bridge");
+          expect(comment.body).toBe("test-body");
         });
     });
 
@@ -280,6 +333,21 @@ describe("/api/articles", () => {
         });
     });
 
+    test("POST 400: Respond with an error when passed an article_id with an body of incorrect format", () => {
+      const postComment = {
+        userblame: "butter_bridge",
+        body: "test-body",
+      };
+      return request(app)
+        .post("/api/articles/invalid_id_format/comments")
+        .send(postComment)
+        .expect(400)
+        .then(({ body }) => {
+          const { message } = body;
+          expect(message).toBe("invalid id type");
+        });
+    });
+
     test("POST 404: Respond with an error when passed an article_id that is not presented in the database.", () => {
       const postComment = {
         username: "butter_bridge",
@@ -291,7 +359,7 @@ describe("/api/articles", () => {
         .expect(404)
         .then(({ body }) => {
           const { message } = body;
-          expect(message).toBe("id not found");
+          expect(message).toBe("doesn't exists in database");
         });
     });
 
@@ -306,7 +374,7 @@ describe("/api/articles", () => {
         .expect(404)
         .then(({ body }) => {
           const { message } = body;
-          expect(message).toBe("username not found");
+          expect(message).toBe("doesn't exists in database");
         });
     });
   });
@@ -348,8 +416,9 @@ describe("/api/articles", () => {
         .get("/api/users")
         .expect(200)
         .then(({ body }) => {
-          expect(body.length).toBe(4);
-          body.forEach((user) => {
+          const { users } = body;
+          expect(users.length).toBe(4);
+          users.forEach((user) => {
             expect(Object.keys(user).length).toBe(3);
             expect(typeof user.username).toBe("string");
             expect(typeof user.name).toBe("string");
@@ -418,7 +487,7 @@ describe("/api/articles", () => {
 });
 
 describe("/api/comments/:comment_id", () => {
-  test.only("PATCH 200: Respond with updated comment with positive vote", () => {
+  test("PATCH 200: Respond with updated comment with positive vote", () => {
     const newCommentVote = {
       inc_votes: 1,
     };
@@ -433,7 +502,7 @@ describe("/api/comments/:comment_id", () => {
       });
   });
 
-  test.only("PATCH 200: Respond with updated comment with negative vote", () => {
+  test("PATCH 200: Respond with updated comment with negative vote", () => {
     const newCommentVote = {
       inc_votes: -1,
     };
@@ -447,7 +516,7 @@ describe("/api/comments/:comment_id", () => {
         expect(patchedComment.votes).toBe(13);
       });
   });
-  test.only("PATCH 200: Respond with updated comment with negative vote in votes are 0", () => {
+  test("PATCH 200: Respond with updated comment with negative vote in votes are 0", () => {
     const newCommentVote = {
       inc_votes: -1,
     };
@@ -462,7 +531,7 @@ describe("/api/comments/:comment_id", () => {
       });
   });
 
-  test.only("PATCH 404: Respond with an error when comment doesn't exists", () => {
+  test("PATCH 404: Respond with an error when comment doesn't exists", () => {
     const newCommentVote = {
       inc_votes: -1,
     };

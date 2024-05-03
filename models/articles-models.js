@@ -49,6 +49,12 @@ function patchArticle(article_id, inc_votes) {
       [inc_votes, article_id]
     )
     .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          message: "id not found",
+        });
+      }
       return rows[0];
     });
 }
@@ -64,10 +70,29 @@ function fetchArticleByTopic(query, queryValue) {
     });
 }
 
+function addNewArticle(title, topic, author, body) {
+  return db
+    .query(
+      `INSERT INTO articles
+          (title, topic, author, body)
+          VALUES
+          ($1,$2,$3,$4)
+                 RETURNING *;`,
+      [title, topic, author, body]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({ status: 404, message: "topic not found" });
+      }
+      return rows[0];
+    });
+}
+
 module.exports = {
   fetchArticleById,
   fetchAllArticles,
   checkIfArticleExists,
   patchArticle,
   fetchArticleByTopic,
+  addNewArticle,
 };

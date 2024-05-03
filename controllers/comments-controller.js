@@ -25,18 +25,13 @@ function postNewComment(request, response, next) {
   const { article_id } = request.params;
   const { username, body } = request.body;
 
-  checkIfArticleExists(article_id)
-    .then(() => {
-      return checkIfUserExists(username);
-    })
-
-    .then(() => {
-      return addNewComment(article_id, username, body);
-    })
+  addNewComment(article_id, username, body)
     .then((comment) => {
       response.status(201).send({ comment });
     })
-    .catch((error) => next(error));
+    .catch((error) => {
+      next(error);
+    });
 }
 
 function deleteCommentById(request, response, next) {

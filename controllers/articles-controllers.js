@@ -4,6 +4,7 @@ const {
   checkIfArticleExists,
   patchArticle,
   fetchArticleByTopic,
+  addNewArticle,
 } = require("../models/articles-models");
 
 function getArticleById(request, response, next) {
@@ -44,18 +45,30 @@ function getPatchedArticle(request, response, next) {
   const { article_id } = request.params;
   const { inc_votes } = request.body;
 
-  checkIfArticleExists(article_id)
-    .then((result) => {
-      return patchArticle(article_id, inc_votes);
-    })
+  patchArticle(article_id, inc_votes)
     .then((patchedArticle) => {
-      response.status(200).send(patchedArticle);
+      response.status(200).send({ patchedArticle });
     })
     .catch((error) => next(error));
+}
+
+function getNewArticle(request, response, next) {
+  const { title, topic, author, body } = request.body;
+
+  addNewArticle(title, topic, author, body)
+    .then((newArticle) => {
+      console.log(newArticle);
+      response.status(201).send({ newArticle });
+    })
+    .catch((error) => {
+      console.log(error);
+      next(error);
+    });
 }
 
 module.exports = {
   getArticleById,
   getArticles,
   getPatchedArticle,
+  getNewArticle,
 };

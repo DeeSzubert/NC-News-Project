@@ -22,7 +22,7 @@ function addNewComment(article_id, username, body) {
       [article_id, username, body]
     )
     .then(({ rows }) => {
-      return rows;
+      return rows[0];
     });
 }
 

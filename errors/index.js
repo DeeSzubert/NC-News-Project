@@ -1,6 +1,8 @@
 function handlePsqlErrors(error, request, response, next) {
   if (error.code === "22P02") {
     response.status(400).send({ message: "invalid id type" });
+  } else if (error.code === "23503") {
+    response.status(404).send({ message: "doesn't exists in database" });
   }
   next(error);
 }
