@@ -19,10 +19,10 @@ const articleRouter = require("./routes/article-router.js");
 const userRouter = require("./routes/users-router.js");
 
 app.use("/api", apiRouter);
-app.use("/users", userRouter);
-app.use("/comments", commentRouter);
-app.use("/topics", topicRouter);
-app.use("/articles", articleRouter);
+// app.use("/users", userRouter);
+// app.use("/comments", commentRouter);
+// app.use("/topics", topicRouter);
+// app.use("/articles", articleRouter);
 
 app.use(handleCustomErrors);
 app.use(handlePsqlErrors);
